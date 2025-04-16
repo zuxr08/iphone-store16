@@ -1,0 +1,213 @@
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iStore — Магазин iPhone</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f4f4;
+      overflow: hidden;
+      color: black;
+    }
+    .page {
+      position: absolute;
+      width: 100vw;
+      height: 100vh;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      background-color: rgba(0,0,0,0.5);
+      backdrop-filter: blur(8px);
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: cover;
+      text-align: center;
+      animation: fadeSlide 1.5s ease;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    .page.active { display: flex; opacity: 1; }
+    .page:first-child { animation: zoomEffect 10s ease-in-out infinite alternate; }
+    .nav {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      gap: 60px;
+    }
+    .nav button {
+      background: rgba(255,255,255,0.9);
+      color: black;
+      border: 1px solid #333;
+      padding: 10px 25px;
+      cursor: pointer;
+      border-radius: 50px;
+      transition: background 0.3s ease;
+    }
+    .nav button:hover { background: rgba(220,220,220,1); }
+    h1 { font-size: 4vw; text-shadow: 0 0 10px rgba(255,255,255,0.4); color: black; }
+    p { font-size: 1.5vw; max-width: 800px; margin-top: 20px; color: black; }
+    .models, .tech-list {
+      display: flex;
+      gap: 60px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 30px;
+    }
+    .model, .tech-item {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 30px;
+      padding: 20px;
+      max-width: 250px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      color: black;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      animation: slideIn 1s ease both;
+    }
+    .model img, .tech-item img {
+      width: 100%;
+      border-radius: 20px;
+    }
+    .model h3, .tech-item h3 {
+      margin: 10px 0 5px;
+      font-size: 1.2em;
+    }
+    .model p, .tech-item p {
+      font-size: 0.9em;
+    }
+    .buy-options button {
+      margin-top: 10px;
+      padding: 8px 16px;
+      border: none;
+      background-color: #007aff;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .order-form { display: none; margin-top: 10px; }
+    .order-form input {
+      margin-top: 5px;
+      padding: 5px;
+      width: 90%;
+    }
+    .installment {
+      margin-top: 10px;
+      font-size: 0.8em;
+      color: #555;
+      display: none;
+    }
+    .installment.show { display: block; }
+    @keyframes zoomEffect {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.2); }
+    }
+    @keyframes slideIn {
+      from { transform: translateY(50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .welcome-message {
+      font-size: 1.4vw;
+      margin-top: 50px;
+      animation: fadeInScale 2s ease forwards;
+      opacity: 0;
+      transform: scale(0.8);
+      color: #000;
+      background: rgba(255,255,255,0.7);
+      padding: 15px 30px;
+      border-radius: 20px;
+      backdrop-filter: blur(4px);
+      text-shadow: 0 0 5px rgba(255,255,255,0.5);
+    }
+    @keyframes fadeInScale {
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Навигация и страницы остаются прежними -->
+  <!-- Вставим обновление JavaScript ниже -->
+  <script>
+    const models = [
+      {
+        name: "iPhone 14 Pro",
+        price: 1299,
+        img: "https://fdn2.gsmarena.com/vv/pics/apple/apple-iphone-14-pro-1.jpg"
+      },
+      {
+        name: "iPhone 15",
+        price: 1399,
+        img: "https://fdn2.gsmarena.com/vv/pics/apple/apple-iphone-15-1.jpg"
+      }
+    ];
+
+    const techItems = [
+      {
+        name: "AirPods",
+        price: 199,
+        img: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/MWP22?wid=2000&hei=2000&fmt=jpeg&qlt=90&.v=1591634795000"
+      }
+    ];
+
+    const modelsContainer = document.getElementById('models-container');
+    const techContainer = document.getElementById('tech-container');
+
+    models.forEach(model => {
+      const div = document.createElement('div');
+      div.className = 'model';
+      div.innerHTML = `
+        <img src="${model.img}" alt="${model.name}">
+        <h3>${model.name}</h3>
+        <p>Цена: ${model.price}$</p>
+        <div class="buy-options">
+          <button onclick="toggleInstallment(this)">Рассрочка</button>
+          <div class="installment">
+            6 месяцев: ${Math.round(model.price / 6)}$/мес<br>
+            12 месяцев: ${Math.round(model.price / 12)}$/мес
+          </div>
+          <button onclick="toggleOrderForm(this)">Заказать</button>
+          <div class="order-form">
+            <input type="text" placeholder="ФИО">
+            <input type="text" placeholder="Паспорт">
+            <input type="text" placeholder="Номер карты">
+            <button onclick="alert('Заявка отправлена!')">Подтвердить</button>
+          </div>
+        </div>
+      `;
+      modelsContainer.appendChild(div);
+    });
+
+    techItems.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'tech-item';
+      div.innerHTML = `
+        <img src="${item.img}" alt="${item.name}">
+        <h3>${item.name}</h3>
+        <p>Цена: ${item.price}$</p>
+      `;
+      techContainer.appendChild(div);
+    });
+
+    function showPage(index) {
+      document.querySelectorAll('.page').forEach((page, i) => {
+        page.classList.toggle('active', i === index);
+      });
+    }
+
+    function toggleInstallment(button) {
+      const installment = button.nextElementSibling;
+      installment.classList.toggle('show');
+    }
+
+    function toggleOrderForm(button) {
+      const form = button.nextElementSibling;
+      form.style.display = form.style.display === 'block' ? 'none' : 'block';
+    }
+  </script>
+</body>
